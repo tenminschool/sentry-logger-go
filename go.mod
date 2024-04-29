@@ -1,4 +1,4 @@
-module github.com/tenminuteschool/sentry-logger-go
+module github.com/tenminschool/sentry-logger-go
 
 go 1.20
 
