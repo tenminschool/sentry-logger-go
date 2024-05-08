@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+	"net/http"
 	"reflect"
 	"time"
 )
@@ -61,6 +63,23 @@ func SentryMiddleware(c *gin.Context) {
 	defer func() {
 		var sentryLogMsg = SentryLogMsg{}
 		if err := recover(); err != nil {
+
+			//API Response
+			if err == mongo.ErrNoDocuments {
+				c.JSON(http.StatusOK, gin.H{
+					"message":     "Document Not Found",
+					"data":        nil,
+					"status_code": http.StatusNotFound,
+				})
+			} else {
+				c.JSON(http.StatusUnprocessableEntity, gin.H{
+					"message":     err,
+					"data":        nil,
+					"status_code": http.StatusUnprocessableEntity,
+				})
+			}
+
+			//Error capture
 			sentryLogMsg.ApiEndPoint = c.Request.RequestURI
 			if e, ok := err.(error); ok {
 				sentryLogMsg.Error = e
